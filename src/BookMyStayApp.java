@@ -1,104 +1,70 @@
-// Version 4.1
+// Version 5.1
 
 import java.util.*;
 
-// Abstract Room Class
-abstract class Room {
-    private String type;
-    private int beds;
-    private int size;
-    private double price;
+// Reservation Class
+class Reservation {
+    private String guestName;
+    private String roomType;
 
-    public Room(String type, int beds, int size, double price) {
-        this.type = type;
-        this.beds = beds;
-        this.size = size;
-        this.price = price;
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
     }
 
-    public String getType() { return type; }
-    public int getBeds() { return beds; }
-    public int getSize() { return size; }
-    public double getPrice() { return price; }
+    public String getGuestName() {
+        return guestName;
+    }
 
-    public void displayDetails(int availability) {
-        System.out.println(type + ":");
-        System.out.println("Beds: " + beds);
-        System.out.println("Size: " + size + " sqft");
-        System.out.println("Price per night: " + price);
-        System.out.println("Available: " + availability);
-        System.out.println();
+    public String getRoomType() {
+        return roomType;
     }
 }
 
-// Room Types
-class SingleRoom extends Room {
-    public SingleRoom() {
-        super("Single Room", 1, 250, 1500.0);
-    }
-}
+// Booking Queue
+class BookingRequestQueue {
 
-class DoubleRoom extends Room {
-    public DoubleRoom() {
-        super("Double Room", 2, 400, 2500.0);
-    }
-}
+    private Queue<Reservation> queue;
 
-class SuiteRoom extends Room {
-    public SuiteRoom() {
-        super("Suite Room", 3, 750, 5000.0);
-    }
-}
-
-// Inventory Class
-class RoomInventory {
-    private HashMap<String, Integer> inventory;
-
-    public RoomInventory() {
-        inventory = new HashMap<>();
-        inventory.put("Single Room", 5);
-        inventory.put("Double Room", 3);
-        inventory.put("Suite Room", 2); // All available
+    public BookingRequestQueue() {
+        queue = new LinkedList<>();
     }
 
-    public int getAvailability(String roomType) {
-        return inventory.getOrDefault(roomType, 0);
+    // Add request
+    public void addRequest(Reservation r) {
+        queue.offer(r);
     }
-}
 
-// Search Service (Read-Only)
-class RoomSearchService {
+    // Process requests (FIFO)
+    public void processRequests() {
+        System.out.println("Booking Request Queue");
 
-    public void searchRooms(List<Room> rooms, RoomInventory inventory) {
+        while (!queue.isEmpty()) {
+            Reservation r = queue.poll(); // FIFO removal
 
-        System.out.println("Room Search\n");
-
-        for (Room room : rooms) {
-
-            int available = inventory.getAvailability(room.getType());
-
-            // Show only available rooms (>0)
-            if (available > 0) {
-                room.displayDetails(available);
-            }
+            System.out.println(
+                    "Processing booking for Guest: " +
+                            r.getGuestName() +
+                            ", Room Type: " +
+                            r.getRoomType()
+            );
         }
     }
 }
 
 // Main Class
-public class BookMyStayApp {
+public class BookMyStayApp{
 
     public static void main(String[] args) {
 
-        List<Room> rooms = new ArrayList<>();
-        rooms.add(new SingleRoom());
-        rooms.add(new DoubleRoom());
-        rooms.add(new SuiteRoom());
+        BookingRequestQueue queue = new BookingRequestQueue();
 
-        RoomInventory inventory = new RoomInventory();
+        // Adding requests (arrival order)
+        queue.addRequest(new Reservation("Abhi", "Single"));
+        queue.addRequest(new Reservation("Subha", "Double"));
+        queue.addRequest(new Reservation("Vanmathi", "Suite"));
 
-        RoomSearchService service = new RoomSearchService();
-
-        service.searchRooms(rooms, inventory);
+        // Process queue
+        queue.processRequests();
     }
 }
